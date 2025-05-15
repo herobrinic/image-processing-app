@@ -1,40 +1,29 @@
-import express from 'express';
-import multer from 'multer';
+import express, { Request, Response } from 'express';
 import path from 'path';
-import fs from 'fs';
+import imagesRouter from './routes/images';
+import uploadRouter from './routes/upload';
 
 const app = express();
+const port = 3000;
 
-// Storage config for multer - store uploads in /uploads folder
-const uploadFolder = path.join(__dirname, '../../uploads');
-if (!fs.existsSync(uploadFolder)) fs.mkdirSync(uploadFolder);
+// Middleware and routes
+app.use('/api/images', imagesRouter);
+app.use('/api/upload', uploadRouter);
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadFolder);
-  },
-  filename: (req, file, cb) => {
-    cb(null, file.originalname);
-  },
+// Example fixed GET route that was throwing the TS error
+app.get('/api/test', (req: Request, res: Response): void => {
+  if (!req.query.filename) {
+    res.status(400).send('Filename required');
+    return; // explicitly stop here, no returned value
+  }
+
+  // Other logic here, e.g.:
+  res.send('Filename exists');
 });
 
-const fileFilter = (req: Express.Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
-  // Accept only jpg/jpeg/png files
-  if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
-    cb(null, true);
-  } else {
-    cb(new Error('Invalid file type'));
-  }
-};
-
-const upload = multer({ storage, fileFilter });
-
-// Upload route
-app.post('/api/upload', upload.single('image'), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ error: 'No file uploaded or invalid file type' });
-  }
-  res.json({ message: 'Image uploaded successfully' });
+// Start the server
+app.listen(port, () => {
+  console.log(`Server listening on port ${port}`);
 });
 
 export default app;
