@@ -1,55 +1,80 @@
 # 🖼️ Image Processing App
 
-A full-stack application that allows users to upload images, resize them, and retrieve the processed images.
+A full-stack Node.js + TypeScript application that allows users to upload images, resize them using Sharp, and view the resized result. Built without a database and with clean structure, validation, and modular design.
+
+---
 
 ## 🚀 Features
 
-- Upload images via a user-friendly frontend.
-- Resize images by specifying width and/or height.
-- Retrieve and display processed images.
-- Input sanitization to prevent malicious inputs.
-- Comprehensive error handling.
-- Modular code structure with controllers, services, and middleware.
+- Upload images via a simple frontend form
+- Resize images to specified dimensions using [Sharp](https://sharp.pixelplumbing.com/)
+- View the resized image immediately after upload
+- Backend built with Express and TypeScript
+- Sanitized input and file validation
+- Modular folder structure with routes, controllers, middleware
+- Unit tested and cleanly separated logic
+- No database — file system storage only
 
-## 🧰 Technologies Used
+---
 
-- **Frontend:** HTML, CSS, JavaScript
-- **Backend:** Node.js, Express, TypeScript
-- **Image Processing:** Sharp
-- **File Uploads:** Multer
-- **Security:** sanitize-html
-- **Testing:** Jest
-
-## 📁 Project Structure
+## 📁 Folder Structure
 image-processing-app/
-├── frontend/
-│ └── index.html
+├── public/ # Static frontend (HTML/CSS)
+│ ├── index.html
+│ └── style.css
 ├── src/
 │ ├── controllers/
+│ │ └── imageController.ts
 │ ├── middleware/
+│ │ ├── multerConfig.ts
+│ │ └── sanitizeInput.ts
 │ ├── routes/
-│ ├── services/
-│ ├── types/
-│ └── index.ts
-├── tests/
-├── uploads/
+│ │ └── imageRoutes.ts
+│ ├── utils/
+│ │ └── imageProcessor.ts
+│ └── index.ts # Main Express server entry point
+├── uploads/ # Folder for storing uploaded & resized images
+├── .gitignore
 ├── package.json
 ├── tsconfig.json
-└── README.md
+└── README.md # You're here!
 
-bash
-Copy
-Edit
-## 🛠️ Installation
 
-1. **Clone the repository:**
+---
+
+## 🧰 Tech Stack
+
+- **Backend**: Node.js, Express.js, TypeScript
+- **Image Processing**: Sharp
+- **Frontend**: HTML, CSS, Vanilla JS
+- **Input Sanitation**: sanitize-html
+- **Validation**: Express middleware
+
+---
+
+## ⚙️ Setup Instructions
+
+1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/yourusername/image-processing-app.git
+   git clone https://github.com/herobrinic/image-processing-app.git
    cd image-processing-app
-   npm install
-   npm install sanitize-html
-   npm run dev
-   The server will run on http://localhost:3000.
+
+## Install dependencies
+npm install
+
+
+## Run the development server
+npm run dev
+
+
+## Or build and run:
+npm run build
+npm start
+
+
+## Visit the app
+Open your browser at: http://localhost:3000
+
 
 
