@@ -16,13 +16,13 @@ export const resizeAndSaveImage = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Invalid width or height' });
     }
 
-    const outputDir = path.join(__dirname, '../../public/uploads');
-    if (!fs.existsSync(outputDir)) {
-      fs.mkdirSync(outputDir, { recursive: true });
+    const publicUploadDir = path.join(__dirname, '../../public/uploads');
+    if (!fs.existsSync(publicUploadDir)) {
+      fs.mkdirSync(publicUploadDir, { recursive: true });
     }
 
-    const outputFilename = `resized-${req.file.filename}`;
-    const outputPath = path.join(outputDir, outputFilename);
+    const outputFilename = `resized-${Date.now()}-${req.file.originalname}`;
+    const outputPath = path.join(publicUploadDir, outputFilename);
 
     await sharp(req.file.path)
       .resize(width, height)
@@ -30,7 +30,7 @@ export const resizeAndSaveImage = async (req: Request, res: Response) => {
 
     return res.status(200).json({ url: `/uploads/${outputFilename}` });
   } catch (error) {
-    console.error('Image processing failed:', error);
+    console.error('Error processing image:', error);
     return res.status(500).json({ error: 'Image processing failed' });
   }
 };

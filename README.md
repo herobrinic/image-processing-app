@@ -19,9 +19,10 @@ A full-stack Node.js + TypeScript application that allows users to upload images
 
 ## 📁 Folder Structure
 image-processing-app/
-├── public/ # Static frontend (HTML/CSS)
-│ ├── index.html
-│ └── style.css
+├── public/
+│   ├── css/
+│   │   └── style.css
+│   └── index.html
 ├── src/
 │ ├── controllers/
 │ │ └── imageController.ts

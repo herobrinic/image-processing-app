@@ -26,19 +26,19 @@ const resizeAndSaveImage = (req, res) => __awaiter(void 0, void 0, void 0, funct
         if (isNaN(width) || isNaN(height)) {
             return res.status(400).json({ error: 'Invalid width or height' });
         }
-        const outputDir = path_1.default.join(__dirname, '../../public/uploads');
-        if (!fs_1.default.existsSync(outputDir)) {
-            fs_1.default.mkdirSync(outputDir, { recursive: true });
+        const publicUploadDir = path_1.default.join(__dirname, '../../public/uploads');
+        if (!fs_1.default.existsSync(publicUploadDir)) {
+            fs_1.default.mkdirSync(publicUploadDir, { recursive: true });
         }
-        const outputFilename = `resized-${req.file.filename}`;
-        const outputPath = path_1.default.join(outputDir, outputFilename);
+        const outputFilename = `resized-${Date.now()}-${req.file.originalname}`;
+        const outputPath = path_1.default.join(publicUploadDir, outputFilename);
         yield (0, sharp_1.default)(req.file.path)
             .resize(width, height)
             .toFile(outputPath);
         return res.status(200).json({ url: `/uploads/${outputFilename}` });
     }
     catch (error) {
-        console.error('Image processing failed:', error);
+        console.error('Error processing image:', error);
         return res.status(500).json({ error: 'Image processing failed' });
     }
 });
