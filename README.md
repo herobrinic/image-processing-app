@@ -65,13 +65,15 @@ image-processing-app/
 npm install
 
 
-## Run the development server
-npm run dev
+
 
 
 ## Or build and run:
 npm run build
 npm start
+
+
+## DONT USE npm run dev !
 
 
 ## Visit the app
