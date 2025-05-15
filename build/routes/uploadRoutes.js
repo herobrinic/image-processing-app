@@ -19,7 +19,6 @@ const fs_1 = __importDefault(require("fs"));
 const imageService_1 = require("../services/imageService");
 const router = express_1.default.Router();
 const uploadsDir = path_1.default.join(__dirname, '../../uploads');
-// Ensure uploads directory exists
 if (!fs_1.default.existsSync(uploadsDir)) {
     fs_1.default.mkdirSync(uploadsDir);
 }
@@ -31,24 +30,26 @@ const storage = multer_1.default.diskStorage({
     },
 });
 const upload = (0, multer_1.default)({ storage });
-router.post('/', upload.single('image'), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        if (!req.file) {
-            return res.status(400).json({ error: 'No image file provided' });
-        }
-        const width = parseInt(req.body.width);
-        const height = parseInt(req.body.height);
-        if (isNaN(width) || isNaN(height)) {
-            return res.status(400).json({ error: 'Invalid width or height' });
-        }
-        const resizedImagePath = yield (0, imageService_1.resizeImage)(req.file.path, width, height);
-        return res.status(200).json({
-            resizedImagePath: `/uploads/${path_1.default.basename(resizedImagePath)}`,
-        });
+// Helper to wrap async route handlers and pass errors to next()
+function asyncHandler(fn) {
+    return (req, res, next) => {
+        fn(req, res, next).catch(next);
+    };
+}
+router.post('/', upload.single('image'), asyncHandler((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+    if (!req.file) {
+        res.status(400).json({ error: 'No image file provided' });
+        return;
     }
-    catch (error) {
-        console.error('Upload error:', error);
-        return res.status(500).json({ error: 'Internal Server Error' });
+    const width = parseInt(req.body.width);
+    const height = parseInt(req.body.height);
+    if (isNaN(width) || isNaN(height)) {
+        res.status(400).json({ error: 'Invalid width or height' });
+        return;
     }
-}));
+    const resizedImagePath = yield (0, imageService_1.resizeImage)(req.file.path, width, height);
+    res.status(200).json({
+        resizedImagePath: `/uploads/${path_1.default.basename(resizedImagePath)}`,
+    });
+})));
 exports.default = router;

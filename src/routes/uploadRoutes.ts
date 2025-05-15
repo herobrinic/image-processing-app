@@ -8,7 +8,6 @@ const router = express.Router();
 
 const uploadsDir = path.join(__dirname, '../../uploads');
 
-// Ensure uploads directory exists
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir);
 }
@@ -23,32 +22,38 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
+// Helper to wrap async route handlers and pass errors to next()
+function asyncHandler(
+  fn: (req: Request, res: Response, next: NextFunction) => Promise<void>
+) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    fn(req, res, next).catch(next);
+  };
+}
+
 router.post(
   '/',
   upload.single('image'),
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      if (!req.file) {
-        return res.status(400).json({ error: 'No image file provided' });
-      }
-
-      const width = parseInt(req.body.width);
-      const height = parseInt(req.body.height);
-
-      if (isNaN(width) || isNaN(height)) {
-        return res.status(400).json({ error: 'Invalid width or height' });
-      }
-
-      const resizedImagePath = await resizeImage(req.file.path, width, height);
-
-      return res.status(200).json({
-        resizedImagePath: `/uploads/${path.basename(resizedImagePath)}`,
-      });
-    } catch (error) {
-      console.error('Upload error:', error);
-      return res.status(500).json({ error: 'Internal Server Error' });
+  asyncHandler(async (req: Request, res: Response, _next: NextFunction) => {
+    if (!req.file) {
+      res.status(400).json({ error: 'No image file provided' });
+      return;
     }
-  }
+
+    const width = parseInt(req.body.width);
+    const height = parseInt(req.body.height);
+
+    if (isNaN(width) || isNaN(height)) {
+      res.status(400).json({ error: 'Invalid width or height' });
+      return;
+    }
+
+    const resizedImagePath = await resizeImage(req.file.path, width, height);
+
+    res.status(200).json({
+      resizedImagePath: `/uploads/${path.basename(resizedImagePath)}`,
+    });
+  })
 );
 
 export default router;
