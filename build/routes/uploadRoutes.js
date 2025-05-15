@@ -15,41 +15,30 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const multer_1 = __importDefault(require("multer"));
 const path_1 = __importDefault(require("path"));
-const fs_1 = __importDefault(require("fs"));
-const imageService_1 = require("../services/imageService");
+const uploadController_1 = require("../controllers/uploadController");
 const router = express_1.default.Router();
-const uploadsDir = path_1.default.join(__dirname, '../../uploads');
-if (!fs_1.default.existsSync(uploadsDir)) {
-    fs_1.default.mkdirSync(uploadsDir);
-}
 const storage = multer_1.default.diskStorage({
-    destination: (_req, _file, cb) => cb(null, uploadsDir),
-    filename: (_req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-        cb(null, uniqueSuffix + path_1.default.extname(file.originalname));
+    destination: (req, file, cb) => {
+        cb(null, path_1.default.join(__dirname, '../../images'));
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + '-' + file.originalname);
     },
 });
-const upload = (0, multer_1.default)({ storage });
-// Helper to wrap async route handlers and pass errors to next()
-function asyncHandler(fn) {
-    return (req, res, next) => {
-        fn(req, res, next).catch(next);
-    };
-}
-router.post('/', upload.single('image'), asyncHandler((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
-    if (!req.file) {
-        res.status(400).json({ error: 'No image file provided' });
-        return;
+const upload = (0, multer_1.default)({
+    storage,
+    fileFilter: (_req, file, cb) => {
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        cb(null, allowedTypes.includes(file.mimetype));
+    },
+});
+router.post('/', upload.single('image'), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const response = yield (0, uploadController_1.uploadImage)(req, res);
+        res.status(200).json(response);
     }
-    const width = parseInt(req.body.width);
-    const height = parseInt(req.body.height);
-    if (isNaN(width) || isNaN(height)) {
-        res.status(400).json({ error: 'Invalid width or height' });
-        return;
+    catch (error) {
+        next(error);
     }
-    const resizedImagePath = yield (0, imageService_1.resizeImage)(req.file.path, width, height);
-    res.status(200).json({
-        resizedImagePath: `/uploads/${path_1.default.basename(resizedImagePath)}`,
-    });
-})));
+}));
 exports.default = router;
