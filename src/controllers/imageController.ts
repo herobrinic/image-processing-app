@@ -1,32 +1,50 @@
 import { Request, Response } from 'express';
+import sharp from 'sharp';
 import path from 'path';
 import fs from 'fs';
-import { resizeImage } from '../services/imageService';
 
-export const resizeImageHandler = async (req: Request, res: Response): Promise<Response | void> => {
+const fullDir = path.resolve(__dirname, '../../full');
+const thumbDir = path.resolve(__dirname, '../../thumb');
+
+export const resizeImageHandler = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { filename, width, height } = req.query;
+    const filename = req.query.filename as string;
+    const width = parseInt(req.query.width as string, 10);
+    const height = parseInt(req.query.height as string, 10);
 
-    if (!filename || !width || !height) {
-      return res.status(400).json({ message: 'Missing required query parameters' });
+    if (!filename) {
+      res.status(400).send('Filename is required');
+      return;
+    }
+    if (isNaN(width) || isNaN(height)) {
+      res.status(400).send('Width and height must be valid numbers');
+      return;
     }
 
-    const widthInt = parseInt(width as string);
-    const heightInt = parseInt(height as string);
+    const inputPath = path.join(fullDir, `${filename}.jpg`);
+    const outputPath = path.join(thumbDir, `${filename}_${width}x${height}.jpg`);
 
-    if (isNaN(widthInt) || isNaN(heightInt)) {
-      return res.status(400).json({ message: 'Width and height must be valid numbers' });
+    // Check if input file exists
+    if (!fs.existsSync(inputPath)) {
+      res.status(404).send('Image not found');
+      return;
     }
 
-    const resizedImagePath = await resizeImage(filename as string, widthInt, heightInt);
-
-    if (!fs.existsSync(resizedImagePath)) {
-      return res.status(500).json({ message: 'Resized image not found after processing' });
+    // If already resized image exists, send it
+    if (fs.existsSync(outputPath)) {
+      res.sendFile(outputPath);
+      return;
     }
 
-    return res.sendFile(path.resolve(resizedImagePath));
+    // Resize and save the image
+    await sharp(inputPath)
+      .resize(width, height)
+      .toFile(outputPath);
+
+    // Send the resized image
+    res.sendFile(outputPath);
   } catch (error) {
-    console.error('Error resizing image:', error);
-    return res.status(500).json({ message: 'Internal server error' });
+    console.error('Error in resizeImageHandler:', error);
+    res.status(500).send('Internal Server Error');
   }
 };
