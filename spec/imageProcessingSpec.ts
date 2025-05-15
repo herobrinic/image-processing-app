@@ -1,9 +1,14 @@
+import path from 'path';
 import { transform } from '../src/utils/imageProcessor';
 
 describe('Image Processing', () => {
-  it('should resize image without throwing', async () => {
-    const testPath = './images/sample.jpg';
-    const outputPath = './thumb/sample_100x100.jpg';
-    await expectAsync(transform(testPath, 100, 100, outputPath)).toBeResolved();
+  const fullPath = path.resolve(__dirname, '../src/assets/full/fjord.jpg');
+  const thumbPath = path.resolve(__dirname, '../src/assets/thumb/fjord_200x200.jpg');
+
+  it('should resize the image', async () => {
+    const width = 200;
+    const height = 200;
+    const result = await transform(fullPath, width, height, thumbPath);
+    expect(result).toBeTruthy();
   });
 });

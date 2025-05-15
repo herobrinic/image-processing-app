@@ -1,23 +1,29 @@
 import supertest from 'supertest';
-import app from '../src/app';
 import path from 'path';
-import fs from 'fs';
-
-const request = supertest(app);
+import app from '../src/app';
 
 describe('Upload Endpoint', () => {
+  let request: ReturnType<typeof supertest>;
+
+  beforeAll(() => {
+    request = supertest(app);
+  });
+
   it('should upload an image successfully', async () => {
-    const imagePath = path.join(__dirname, 'test-files/sample.jpg');
-    const res = await request.post('/api/upload')
-      .attach('image', imagePath);
+    const res = await request
+      .post('/api/upload')
+      .attach('image', path.join(__dirname, 'test.jpg'));
+
     expect(res.status).toBe(200);
-    expect(res.body).toHaveProperty('filename');
+    expect(res.body.message).toBe('Image uploaded successfully');
   });
 
   it('should reject invalid file type', async () => {
-    const pdfPath = path.join(__dirname, 'test-files/sample.pdf');
-    const res = await request.post('/api/upload')
-      .attach('image', pdfPath);
+    const res = await request
+      .post('/api/upload')
+      .attach('image', path.join(__dirname, 'test.txt'));
+
     expect(res.status).toBe(400);
+    expect(res.body.error).toBeDefined();
   });
 });
