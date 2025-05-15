@@ -1,5 +1,3 @@
-// src/middleware/errorHandler.ts
-
 import { Request, Response, NextFunction } from 'express';
 
 interface ErrorWithStatus extends Error {
@@ -11,8 +9,8 @@ export function errorHandler(
   req: Request,
   res: Response,
   next: NextFunction
-) {
-  console.error(err); // Log error for debugging
+): void {
+  console.error(err.stack);
 
   const status = err.status || 500;
   res.status(status).json({
