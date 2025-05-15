@@ -1,26 +1,32 @@
 import { Request, Response } from 'express';
-import { resizeImage } from '../services/imageService';
 import path from 'path';
+import fs from 'fs';
+import { resizeImage } from '../services/imageService';
 
 export const resizeImageHandler = async (req: Request, res: Response): Promise<Response | void> => {
-  const { filename, width, height } = req.query;
-
-  if (!filename || !width || !height) {
-    return res.status(400).json({ error: 'Missing query parameters: filename, width, and height are required' });
-  }
-
-  const widthNum = parseInt(width as string, 10);
-  const heightNum = parseInt(height as string, 10);
-
-  if (isNaN(widthNum) || isNaN(heightNum)) {
-    return res.status(400).json({ error: 'Width and height must be valid numbers' });
-  }
-
   try {
-    const imagePath = await resizeImage(filename as string, widthNum, heightNum);
-    return res.sendFile(path.resolve(imagePath));
+    const { filename, width, height } = req.query;
+
+    if (!filename || !width || !height) {
+      return res.status(400).json({ message: 'Missing required query parameters' });
+    }
+
+    const widthInt = parseInt(width as string);
+    const heightInt = parseInt(height as string);
+
+    if (isNaN(widthInt) || isNaN(heightInt)) {
+      return res.status(400).json({ message: 'Width and height must be valid numbers' });
+    }
+
+    const resizedImagePath = await resizeImage(filename as string, widthInt, heightInt);
+
+    if (!fs.existsSync(resizedImagePath)) {
+      return res.status(500).json({ message: 'Resized image not found after processing' });
+    }
+
+    return res.sendFile(path.resolve(resizedImagePath));
   } catch (error) {
-    console.error('Resize error:', error);
-    return res.status(500).json({ error: 'Failed to resize image', details: (error as Error).message });
+    console.error('Error resizing image:', error);
+    return res.status(500).json({ message: 'Internal server error' });
   }
 };

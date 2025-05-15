@@ -1,18 +1,22 @@
-// src/index.ts
 import express from 'express';
+import path from 'path';
 import imageRoutes from './routes/imageRoutes';
 import uploadRoutes from './routes/uploadRoutes';
-import path from 'path';
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = 3000;
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Serve static files from the uploads and processed directories
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
-app.use('/public', express.static(path.join(__dirname, '../public')));
+app.use('/processed', express.static(path.join(__dirname, '../processed')));
 
+// Routes
 app.use('/api/images', imageRoutes);
-app.use('/api/uploads', uploadRoutes);
+app.use('/api/upload', uploadRoutes);
 
 app.listen(PORT, () => {
-	console.log(`Server is running on http://localhost:${PORT}`);
+  console.log(`Server is running on http://localhost:${PORT}`);
 });
