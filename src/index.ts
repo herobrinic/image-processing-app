@@ -1,4 +1,5 @@
 import express from 'express';
+import path from 'path';
 import uploadRoutes from './routes/uploadRoutes';
 import imageRoutes from './routes/imageRoutes';
 import { errorHandler } from './middleware/errorHandler';
@@ -8,6 +9,7 @@ const app = express();
 
 app.use(express.json());
 app.use(sanitizeQueryParams);
+app.use(express.static(path.join(__dirname, '..', 'frontend')));
 
 app.use('/api/upload', uploadRoutes);
 app.use('/api/images', imageRoutes);
