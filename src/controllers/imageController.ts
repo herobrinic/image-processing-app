@@ -1,29 +1,31 @@
-import { Request, Response } from 'express';
-import { processImage } from '../services/imageService';
+import { Request, Response, NextFunction } from 'express';
+import path from 'path';
+import fs from 'fs';
 
-
-export const resizeImageHandler = async (req: Request, res: Response) => {
-  const { filename, width, height } = req.query;
-
-  if (!filename || !width || !height) {
-    return res.status(400).send('Missing required query parameters');
-  }
-
-  const parsedWidth = parseInt(width as string, 10);
-  const parsedHeight = parseInt(height as string, 10);
-
-  if (isNaN(parsedWidth) || isNaN(parsedHeight)) {
-    return res.status(400).send('Width and height must be numbers');
-  }
-
+export const uploadImage = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
-    const processedImagePath = await processImage(
-      filename as string,
-      parsedWidth,
-      parsedHeight
-    );
-    res.sendFile(processedImagePath);
+    if (!req.file) {
+      res.status(400).json({ error: 'No file uploaded' });
+      return;
+    }
+
+    const filePath = path.join(__dirname, '../../uploads', req.file.filename);
+
+    // Optional: check if file was saved correctly
+    if (!fs.existsSync(filePath)) {
+      res.status(500).json({ error: 'File upload failed' });
+      return;
+    }
+
+    res.status(200).json({
+      message: 'Image uploaded successfully',
+      filename: req.file.filename,
+    });
   } catch (error) {
-    res.status(500).send((error as Error).message);
+    next(error);
   }
 };
