@@ -1,17 +1,40 @@
 import express from 'express';
+import multer from 'multer';
 import path from 'path';
-import uploadRoutes from './routes/uploadRoutes';
+import fs from 'fs';
 
 const app = express();
 
-app.use(express.json());
-app.use(express.static(path.join(__dirname, '../public')));
-app.use('/images', express.static(path.join(__dirname, '../images')));
+// Storage config for multer - store uploads in /uploads folder
+const uploadFolder = path.join(__dirname, '../../uploads');
+if (!fs.existsSync(uploadFolder)) fs.mkdirSync(uploadFolder);
 
-app.use('/api/upload', uploadRoutes);
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadFolder);
+  },
+  filename: (req, file, cb) => {
+    cb(null, file.originalname);
+  },
+});
 
-app.get('/', (_req, res) => {
-  res.sendFile(path.join(__dirname, '../public/index.html'));
+const fileFilter = (req: Express.Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+  // Accept only jpg/jpeg/png files
+  if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
+    cb(null, true);
+  } else {
+    cb(new Error('Invalid file type'));
+  }
+};
+
+const upload = multer({ storage, fileFilter });
+
+// Upload route
+app.post('/api/upload', upload.single('image'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: 'No file uploaded or invalid file type' });
+  }
+  res.json({ message: 'Image uploaded successfully' });
 });
 
 export default app;

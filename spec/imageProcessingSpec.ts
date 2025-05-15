@@ -1,14 +1,26 @@
 import path from 'path';
+import fs from 'fs';
 import { transform } from '../src/utils/imageProcessor';
 
 describe('Image Processing', () => {
-  const fullPath = path.resolve(__dirname, '../src/assets/full/fjord.jpg');
-  const thumbPath = path.resolve(__dirname, '../src/assets/thumb/fjord_200x200.jpg');
+  const inputPath = path.join(__dirname, 'test.jpg');
+  const outputPath = path.join(__dirname, 'resized.jpg');
+
+  beforeAll(() => {
+    if (!fs.existsSync(inputPath)) {
+      throw new Error(`Test image not found at ${inputPath}. Please add a test.jpg file to the spec folder.`);
+    }
+  });
+
+  afterAll(() => {
+    if (fs.existsSync(outputPath)) {
+      fs.unlinkSync(outputPath);
+    }
+  });
 
   it('should resize the image', async () => {
-    const width = 200;
-    const height = 200;
-    const result = await transform(fullPath, width, height, thumbPath);
-    expect(result).toBeTruthy();
+    await transform(inputPath, outputPath, 200, 200);
+
+    expect(fs.existsSync(outputPath)).toBe(true);
   });
 });
