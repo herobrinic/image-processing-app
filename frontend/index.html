@@ -1,94 +1,54 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Image Processor</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 2rem;
-      background: #f9f9f9;
+<form id="upload-form">
+  <label>Select image to upload:</label>
+  <input type="file" id="imageInput" name="image" required />
+
+  <label>Width (optional):</label>
+  <input type="number" id="widthInput" name="width" placeholder="e.g. 200" />
+
+  <label>Height (optional):</label>
+  <input type="number" id="heightInput" name="height" placeholder="e.g. 200" />
+
+  <button type="submit">Upload and Resize</button>
+</form>
+
+<script>
+  const form = document.getElementById('upload-form');
+  const output = document.getElementById('output');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const fileInput = document.getElementById('imageInput');
+    const widthInput = document.getElementById('widthInput');
+    const heightInput = document.getElementById('heightInput');
+
+    const formData = new FormData();
+    formData.append('image', fileInput.files[0]);
+    if (widthInput.value) formData.append('width', widthInput.value);
+    if (heightInput.value) formData.append('height', heightInput.value);
+
+    try {
+      const uploadRes = await fetch('/upload', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!uploadRes.ok) throw new Error('Upload failed');
+
+      const uploadData = await uploadRes.json();
+      const filename = uploadData.filename;
+
+      // Build query
+      const params = new URLSearchParams();
+      if (widthInput.value) params.append('width', widthInput.value);
+      if (heightInput.value) params.append('height', heightInput.value);
+
+      const imageUrl = `/uploads/${filename}`;
+      output.innerHTML = `<h3>Processed Image:</h3><img src="${imageUrl}" alt="Processed image" />`;
+
+    } catch (err) {
+      console.error(err);
+      output.innerHTML = `<p style="color:red;">${err.message}</p>`;
     }
-    form {
-      margin-bottom: 2rem;
-      background: white;
-      padding: 1.5rem;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    input, button {
-      padding: 0.5rem;
-      margin-top: 0.5rem;
-      margin-bottom: 1rem;
-      width: 100%;
-    }
-    img {
-      max-width: 100%;
-      margin-top: 2rem;
-      border: 2px solid #ddd;
-      border-radius: 8px;
-    }
-  </style>
-</head>
-<body>
-  <h1>Image Processing App</h1>
-
-  <form id="upload-form">
-    <label>Select image to upload:</label>
-    <input type="file" id="imageInput" name="image" required />
-
-    <label>Width (optional):</label>
-    <input type="number" id="widthInput" name="width" placeholder="e.g. 200" />
-
-    <label>Height (optional):</label>
-    <input type="number" id="heightInput" name="height" placeholder="e.g. 200" />
-
-    <button type="submit">Upload and Resize</button>
-  </form>
-
-  <div id="output"></div>
-
-  <script>
-    const form = document.getElementById('upload-form');
-    const output = document.getElementById('output');
-
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      const fileInput = document.getElementById('imageInput');
-      const widthInput = document.getElementById('widthInput');
-      const heightInput = document.getElementById('heightInput');
-
-      const formData = new FormData();
-      formData.append('image', fileInput.files[0]);
-      if (widthInput.value) formData.append('width', widthInput.value);
-      if (heightInput.value) formData.append('height', heightInput.value);
-
-      try {
-        const uploadRes = await fetch('http://localhost:3000/upload', {
-          method: 'POST',
-          body: formData
-        });
-
-        if (!uploadRes.ok) throw new Error('Upload failed');
-
-        const uploadData = await uploadRes.json();
-        const filename = uploadData.filename;
-
-        // Build query
-        const params = new URLSearchParams();
-        if (widthInput.value) params.append('width', widthInput.value);
-        if (heightInput.value) params.append('height', heightInput.value);
-
-        const imageUrl = `http://localhost:3000/image/${filename}?${params.toString()}`;
-        output.innerHTML = `<h3>Processed Image:</h3><img src="${imageUrl}" alt="Processed image" />`;
-
-      } catch (err) {
-        console.error(err);
-        output.innerHTML = `<p style="color:red;">${err.message}</p>`;
-      }
-    });
-  </script>
-</body>
-</html>
+  });
+</script>
