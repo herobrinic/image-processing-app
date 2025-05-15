@@ -1,32 +1,30 @@
 import express from 'express';
 import path from 'path';
-import uploadRoutes from './routes/uploadRoutes';
 import imageRoutes from './routes/imageRoutes';
+import uploadRoutes from './routes/uploadRoutes';
 import { errorHandler } from './middleware/errorHandler';
 import { sanitizeQueryParams } from './middleware/sanitizeInput';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// Serve static files from 'public' and 'uploads'
+// Serve public folder statically for frontend files like index.html, CSS, JS
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
-// Serve uploaded images statically
+// Serve uploads folder statically for serving uploaded images
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
-// Routes
-app.use('/api', imageRoutes);
+// Parse JSON bodies
+app.use(express.json());
 
-// ✅ Serve index.html at "/"
-app.get('/', (_req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
-});
+// API routes
+app.use('/images', imageRoutes);
+app.use('/api/upload', uploadRoutes);
 
-// Start the server
+
+
+// Start server
 app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
+  console.log(`Server is running on http://localhost:${PORT}`);
 });
+

@@ -60,7 +60,7 @@
       const formData = new FormData(form);
 
       try {
-        const res = await fetch('/api/upload', {
+        const response = await fetch('/api/upload', {
           method: 'POST',
           body: formData
         });

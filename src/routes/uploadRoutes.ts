@@ -19,6 +19,20 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // POST /upload
-router.post('/upload', upload.single('image'), uploadImage);
+router.post('/', upload.single('image'), resizeAndSaveImage);
 
-export default router;
+async function resizeAndSaveImage(req: any, res: any) {
+  if (!req.file) {
+    res.status(400).json({ message: 'No file uploaded' });
+    return;
+  }
+
+  try {
+    await uploadImage(req, res);
+  } catch (error) {
+    console.error('Error uploading image:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+}
+
+export default router;  
