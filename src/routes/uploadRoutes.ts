@@ -1,38 +1,24 @@
 import express from 'express';
 import multer from 'multer';
 import path from 'path';
-import fs from 'fs';
+import { uploadImage } from '../controllers/uploadController';
 
 const router = express.Router();
 
-const imageDir = path.join(__dirname, '..', 'images');
-if (!fs.existsSync(imageDir)) fs.mkdirSync(imageDir);
-
+// Set up Multer storage
 const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => {
-    cb(null, imageDir);
+  destination: function (_req, _file, cb) {
+    cb(null, path.join(__dirname, '../../uploads'));
   },
-  filename: (_req, file, cb) => {
-    cb(null, file.originalname);
-  }
+  filename: function (_req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    cb(null, `${uniqueSuffix}-${file.originalname}`);
+  },
 });
 
-const upload = multer({
-  storage,
-  fileFilter: (_req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase();
-    if (ext !== '.jpg' && ext !== '.jpeg') {
-      return cb(new Error('Only .jpg files are allowed'));
-    }
-    cb(null, true);
-  }
-});
+const upload = multer({ storage });
 
-router.post('/', upload.single('image'), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ error: 'No image uploaded' });
-  }
-  return res.status(200).json({ message: 'Image uploaded successfully' });
-});
+// POST /upload
+router.post('/upload', upload.single('image'), uploadImage);
 
 export default router;
