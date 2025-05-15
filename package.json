@@ -9,6 +9,7 @@
   "lint": "eslint . --ext .ts",
   "format": "prettier --write \"src/**/*.ts\"",
   "test": "jasmine"
+  
 },
   "keywords": [],
   "author": "",

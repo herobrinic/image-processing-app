@@ -1,33 +1,29 @@
+// src/services/imageService.ts
 import sharp from 'sharp';
 import path from 'path';
 import fs from 'fs';
 
-const fullDir = path.join(__dirname, '..', 'images');
-const thumbsDir = path.join(__dirname, '..', 'thumbs');
+const outputDir = path.join(__dirname, '../../public/resized');
 
-if (!fs.existsSync(thumbsDir)) fs.mkdirSync(thumbsDir);
+// Ensure the output directory exists
+if (!fs.existsSync(outputDir)) {
+	fs.mkdirSync(outputDir, { recursive: true });
+}
 
-export const processImage = async (
-  filename: string,
-  width: number,
-  height: number
-): Promise<string> => {
-  const fullPath = path.join(fullDir, filename);
-  const outputName = `${path.parse(filename).name}_${width}x${height}.jpg`;
-  const outputPath = path.join(thumbsDir, outputName);
+export async function resizeImage(
+	filename: string,
+	width: number,
+	height: number
+): Promise<string> {
+	const inputPath = path.join(__dirname, '../../uploads', filename);
+	const outputFilename = `${path.parse(filename).name}-${width}x${height}${path.extname(filename)}`;
+	const outputPath = path.join(outputDir, outputFilename);
 
-  if (!fs.existsSync(fullPath)) {
-    throw new Error('Original image not found');
-  }
+	// Check if image already exists
+	if (fs.existsSync(outputPath)) {
+		return outputPath;
+	}
 
-  if (fs.existsSync(outputPath)) {
-    return outputPath;
-  }
-
-  await sharp(fullPath)
-    .resize(width, height)
-    .jpeg()
-    .toFile(outputPath);
-
-  return outputPath;
-};
+	await sharp(inputPath).resize(width, height).toFile(outputPath);
+	return outputPath;
+}
