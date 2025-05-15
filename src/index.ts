@@ -6,22 +6,27 @@ import { errorHandler } from './middleware/errorHandler';
 import { sanitizeQueryParams } from './middleware/sanitizeInput';
 
 const app = express();
+const PORT = process.env.PORT || 3000;
 
-// Middleware to parse JSON and form data
+// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve frontend HTML/CSS
+// Serve static files from 'public' and 'uploads'
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // Serve uploaded images statically
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
 // Routes
-app.use('/', imageRoutes);
+app.use('/api', imageRoutes);
 
-// Start server
-const PORT = process.env.PORT || 3000;
+// ✅ Serve index.html at "/"
+app.get('/', (_req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
+});
+
+// Start the server
 app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+  console.log(`🚀 Server running at http://localhost:${PORT}`);
 });

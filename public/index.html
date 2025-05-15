@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Image Uploader</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      padding: 2rem;
+    }
+    form {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      max-width: 400px;
+      margin: auto;
+    }
+    input, button {
+      display: block;
+      margin-top: 1rem;
+      width: 100%;
+      padding: 0.5rem;
+    }
+    img {
+      margin-top: 1rem;
+      max-width: 100%;
+    }
+    #message {
+      margin-top: 1rem;
+      font-weight: bold;
+      color: green;
+    }
+  </style>
+</head>
+<body>
+
+  <form id="uploadForm">
+    <h2>Upload and Resize Image</h2>
+    <input type="file" name="image" accept="image/*" required />
+    <input type="number" name="width" placeholder="Width (px)" required />
+    <input type="number" name="height" placeholder="Height (px)" required />
+    <button type="submit">Upload & Resize</button>
+    <div id="message"></div>
+    <img id="preview" src="" alt="" />
+  </form>
+
+  <script>
+    const form = document.getElementById('uploadForm');
+    const message = document.getElementById('message');
+    const preview = document.getElementById('preview');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      message.textContent = '';
+      preview.src = '';
+
+      const formData = new FormData(form);
+
+      try {
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!res.ok) throw new Error('Upload failed');
+
+        const data = await res.json();
+        message.textContent = 'Image uploaded and resized successfully!';
+        preview.src = data.url;
+      } catch (err) {
+        message.textContent = 'Error: ' + err.message;
+        message.style.color = 'red';
+      }
+    });
+  </script>
+</body>
+</html>
