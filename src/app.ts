@@ -1,19 +1,24 @@
-import express from "express";
-import path from "path";
-import imageRoutes from "./routes/imageRoutes";
-import uploadRoutes from "./routes/uploadRoutes";
+import express from 'express';
+import path from 'path';
+import uploadRoutes from './routes/uploadRoutes';
 
 const app = express();
 
-// Middleware to parse JSON and urlencoded form data
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static files (CSS, JS, images) from 'public' folder
-app.use(express.static(path.join(__dirname, "../public")));
+// Serve uploads folder publicly
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-// Use routes with /api prefix
-app.use("/api/images", imageRoutes);
-app.use("/api/upload", uploadRoutes);
+// Mount API routes with `/api` prefix
+app.use('/api/upload', uploadRoutes);
+
+// Serve your frontend (adjust path if needed)
+app.use(express.static(path.join(__dirname, '../public')));
+
+// Catch-all for frontend routes (optional)
+app.get('*', (_req, res) => {
+  res.sendFile(path.join(__dirname, '../public/index.html'));
+});
 
 export default app;

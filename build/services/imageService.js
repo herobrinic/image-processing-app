@@ -12,26 +12,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.resizeImage = resizeImage;
-// src/services/imageService.ts
+exports.resizeImage = void 0;
 const sharp_1 = __importDefault(require("sharp"));
 const path_1 = __importDefault(require("path"));
-const fs_1 = __importDefault(require("fs"));
-const outputDir = path_1.default.join(__dirname, '../../public/resized');
-// Ensure the output directory exists
-if (!fs_1.default.existsSync(outputDir)) {
-    fs_1.default.mkdirSync(outputDir, { recursive: true });
-}
-function resizeImage(filename, width, height) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const inputPath = path_1.default.join(__dirname, '../../uploads', filename);
-        const outputFilename = `${path_1.default.parse(filename).name}-${width}x${height}${path_1.default.extname(filename)}`;
-        const outputPath = path_1.default.join(outputDir, outputFilename);
-        // Check if image already exists
-        if (fs_1.default.existsSync(outputPath)) {
-            return outputPath;
-        }
-        yield (0, sharp_1.default)(inputPath).resize(width, height).toFile(outputPath);
-        return outputPath;
-    });
-}
+const resizeImage = (inputPath, width, height) => __awaiter(void 0, void 0, void 0, function* () {
+    const outputFilename = `resized-${Date.now()}${path_1.default.extname(inputPath)}`;
+    const outputPath = path_1.default.join(path_1.default.dirname(inputPath), outputFilename);
+    yield (0, sharp_1.default)(inputPath)
+        .resize(width, height)
+        .toFile(outputPath);
+    return outputPath;
+});
+exports.resizeImage = resizeImage;
