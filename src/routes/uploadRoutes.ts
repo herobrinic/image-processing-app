@@ -26,10 +26,11 @@ const fileFilter = (
 
 const upload = multer({ storage, fileFilter });
 
-router.post('/upload', upload.single('image'), async (req: Request, res: Response) => {
+router.post('/upload', upload.single('image'), async (req: Request, res: Response): Promise<void> => {
   try {
     if (!req.file) {
-      return res.status(400).json({ error: 'No file provided or invalid file type' });
+      res.status(400).json({ error: 'No file provided or invalid file type' });
+      return;
     }
 
     const filename = `${Date.now()}-${req.file.originalname}`;
@@ -39,9 +40,9 @@ router.post('/upload', upload.single('image'), async (req: Request, res: Respons
       .resize(200, 200)
       .toFile(outputPath);
 
-    return res.status(200).json({ message: 'Image uploaded and resized successfully', filename });
+    res.status(200).json({ message: 'Image uploaded and resized successfully', filename });
   } catch (err) {
-    return res.status(500).json({ error: 'Server error during upload' });
+    res.status(500).json({ error: 'Server error during upload' });
   }
 });
 
