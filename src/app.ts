@@ -1,29 +1,26 @@
-import express, { Request, Response } from 'express';
+import express from 'express';
 import path from 'path';
-import imagesRouter from './routes/images';
-import uploadRouter from './routes/upload';
+import uploadRoutes from './routes/uploadRoutes';
+import imageRoutes from './routes/imageRoutes';
+
 
 const app = express();
-const port = 3000;
 
-// Middleware and routes
-app.use('/api/images', imagesRouter);
-app.use('/api/upload', uploadRouter);
+// Middleware
+app.use(express.json());
 
-// Example fixed GET route that was throwing the TS error
-app.get('/api/test', (req: Request, res: Response): void => {
-  if (!req.query.filename) {
-    res.status(400).send('Filename required');
-    return; // explicitly stop here, no returned value
-  }
+// Static files
+app.use(express.static('public'));
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+app.use('/resized', express.static(path.join(__dirname, '../resized')));
 
-  // Other logic here, e.g.:
-  res.send('Filename exists');
-});
+// Routes
+app.use('/api/upload', uploadRoutes);
+app.use('/api/images', imageRoutes);
 
-// Start the server
-app.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
+// Health check
+app.get('/', (_req, res) => {
+  res.send('Image Processing API is running.');
 });
 
 export default app;

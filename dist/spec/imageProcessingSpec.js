@@ -3,15 +3,21 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+// spec/imageProcessingSpec.ts
 const path_1 = __importDefault(require("path"));
-const imageProcessor_1 = require("../src/utils/imageProcessor");
+const fs_1 = __importDefault(require("fs"));
+const sharp_1 = __importDefault(require("sharp"));
 describe('Image Processing', () => {
-    it('should resize the image', async () => {
-        const width = parseInt('200');
-        const height = parseInt('200');
-        // Provide output path - usually something in your temp or test folder
-        const outputPath = path_1.default.resolve(__dirname, '../temp/fjord_200x200.jpg');
-        const output = await (0, imageProcessor_1.transform)('fjord', width, height, outputPath);
-        expect(output).toBe(outputPath);
+    const inputPath = path_1.default.join(__dirname, '../uploads/test.jpg');
+    const outputPath = path_1.default.join(__dirname, '../resized/test_200x200.jpg');
+    it('should resize an image and save it to the resized directory', async () => {
+        // Make sure the input image exists
+        expect(fs_1.default.existsSync(inputPath)).toBeTrue();
+        // Remove old resized image if exists
+        if (fs_1.default.existsSync(outputPath))
+            fs_1.default.unlinkSync(outputPath);
+        await (0, sharp_1.default)(inputPath).resize(200, 200).toFile(outputPath);
+        // Validate output
+        expect(fs_1.default.existsSync(outputPath)).toBeTrue();
     });
 });

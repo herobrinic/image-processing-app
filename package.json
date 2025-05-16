@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "postbuild": "cp -r uploads dist/ && cp -r spec/test.jpg dist/spec/test.jpg",
     "dev": "nodemon src/index.ts",
     "start": "node build/index.js",
     "build": "tsc",
