@@ -2,12 +2,17 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.uploadImage = void 0;
 const uploadImage = async (req, res) => {
-    if (!req.file) {
-        throw new Error('No file uploaded');
+    try {
+        if (!req.file) {
+            res.status(400).json({ message: 'No file uploaded' });
+            return;
+        }
+        const filename = req.file.filename;
+        res.status(200).json({ message: 'Upload successful', filename });
     }
-    return {
-        message: 'Image uploaded successfully',
-        filename: req.file.filename,
-    };
+    catch (error) {
+        console.error('Upload error:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
 };
 exports.uploadImage = uploadImage;

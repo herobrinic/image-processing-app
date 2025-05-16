@@ -3,14 +3,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.transform = transform;
+exports.resizeImage = void 0;
 const sharp_1 = __importDefault(require("sharp"));
-const fs_1 = __importDefault(require("fs"));
-async function transform(inputPath, width, height, outputPath) {
-    if (!fs_1.default.existsSync(inputPath)) {
-        throw new Error('Input file does not exist.');
-    }
-    await (0, sharp_1.default)(inputPath)
-        .resize(width, height)
+const path_1 = __importDefault(require("path"));
+const resizeImage = async (filepath) => {
+    const outputDir = path_1.default.join(__dirname, '../../public/uploads');
+    const outputFilename = `resized-${path_1.default.basename(filepath)}`;
+    const outputPath = path_1.default.join(outputDir, outputFilename);
+    await (0, sharp_1.default)(filepath)
+        .resize(200, 200)
         .toFile(outputPath);
-}
+    return outputFilename;
+};
+exports.resizeImage = resizeImage;

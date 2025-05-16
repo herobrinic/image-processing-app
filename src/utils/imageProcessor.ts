@@ -1,17 +1,15 @@
 import sharp from 'sharp';
+import path from 'path';
 import fs from 'fs';
 
-export async function transform(
-  inputPath: string,
-  width: number,
-  height: number,
-  outputPath: string
-): Promise<void> {
-  if (!fs.existsSync(inputPath)) {
-    throw new Error('Input file does not exist.');
-  }
+export const resizeImage = async (filepath: string): Promise<string> => {
+  const outputDir = path.join(__dirname, '../../public/uploads');
+  const outputFilename = `resized-${path.basename(filepath)}`;
+  const outputPath = path.join(outputDir, outputFilename);
 
-  await sharp(inputPath)
-    .resize(width, height)
+  await sharp(filepath)
+    .resize(200, 200)
     .toFile(outputPath);
-}
+
+  return outputFilename;
+};

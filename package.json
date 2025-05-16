@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "postbuild": "cp -r uploads dist/ && cp -r spec/test.jpg dist/spec/test.jpg",
+    "prebuild": "if not exist uploads mkdir uploads",
+    "postbuild": "if exist uploads ( xcopy uploads dist\\uploads /E /I /Y ) && if not exist dist\\spec mkdir dist\\spec && copy /Y spec\\test.jpg dist\\spec\\test.jpg",
     "dev": "nodemon src/index.ts",
     "start": "node build/index.js",
     "build": "tsc",

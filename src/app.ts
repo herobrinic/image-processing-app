@@ -1,26 +1,21 @@
-import express from 'express';
+import express, { Application } from 'express';
 import path from 'path';
-import uploadRoutes from './routes/upload';
-import imageRoutes from './routes/imageRoutes';
+import uploadRoutes from './routes/uploadRoutes';
 
+const app: Application = express();
+const port = 3000;
 
-const app = express();
+app.use(express.static(path.join(__dirname, '../public')));
+app.use('/api', uploadRoutes);
 
-// Middleware
-app.use(express.json());
-
-// Static files
-app.use(express.static('public'));
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
-app.use('/resized', express.static(path.join(__dirname, '../resized')));
-
-// Routes
-app.use('/api/upload', uploadRoutes);
-app.use('/api/images', imageRoutes);
-
-// Health check
-app.get('/', (_req, res) => {
-  res.send('Image Processing API is running.');
+// Error handler
+app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction): void => {
+  res.status(500).json({ error: err.message });
 });
+
+
+if (require.main === module) {
+  app.listen(port, () => console.log(`Server running on port ${port}`));
+}
 
 export default app;
