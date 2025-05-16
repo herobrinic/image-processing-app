@@ -1,41 +1,26 @@
+import request from 'supertest';
+import app from '../src/app'; // Adjust path if needed
 import path from 'path';
-import fs from 'fs';
-import supertest from 'supertest';
-import app from '../src/app';
-
-const request = supertest(app);
 
 describe('Upload Endpoint', () => {
   const testImagePath = path.join(__dirname, 'test.jpg');
-  const testTxtPath = path.join(__dirname, 'test.txt');
-
-  beforeAll(() => {
-    // Ensure test image exists
-    if (!fs.existsSync(testImagePath)) {
-      throw new Error(`Test image not found at ${testImagePath}. Please add a test.jpg file to the spec folder.`);
-    }
-
-    // Create dummy text file if missing
-    if (!fs.existsSync(testTxtPath)) {
-      fs.writeFileSync(testTxtPath, 'This is not an image.');
-    }
-  });
 
   it('should upload an image successfully', async () => {
-    const res = await request
-      .post('/api/upload')
+    const response = await request(app)
+      .post('/upload')
       .attach('image', testImagePath);
 
-    expect(res.status).toBe(200);
-    expect(res.body.message).toBe('Image uploaded successfully');
+    expect(response.status).toBe(200);
+    expect(response.body.message).toBe('Image uploaded successfully');
+    expect(response.body.filename).toBeDefined();
   });
 
   it('should reject invalid file type', async () => {
-    const res = await request
-      .post('/api/upload')
-      .attach('image', testTxtPath);
+    const response = await request(app)
+      .post('/upload')
+      .attach('image', path.join(__dirname, 'test.txt')); // Invalid file type
 
-    expect(res.status).toBe(400);
-    expect(res.body.error).toBeDefined();
+    expect(response.status).toBe(400);
+    expect(response.body.error).toBeDefined();
   });
 });

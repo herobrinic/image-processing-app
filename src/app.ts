@@ -1,6 +1,6 @@
 import express from 'express';
 import path from 'path';
-import uploadRoutes from './routes/uploadRoutes';
+import uploadRoutes from './routes/upload';
 import imageRoutes from './routes/imageRoutes';
 
 
